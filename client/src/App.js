@@ -8,7 +8,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {document: " ",storageValue: 0,
-       messageHashed: null, web3: null, 
+       messageChecked: null, web3: null, hashedMessage: null, 
        accounts: null, contract: null};
 
     this.handleChange = this.handleChange.bind(this);
@@ -55,9 +55,11 @@ class App extends Component {
     //Invoking set method in content tracking contract to post document to blockchain
     await contract.methods.storeDocument(document).send({ from: accounts[0] });
 
-    // await contract.methods.hashDocument(document).send({ from: accounts[0] });
-
     //Method to set hashed document as a state variable
+    const hashResponse = await contract.methods.returnHashedDocument(document).call();
+    this.setState( { hashedMessage: hashResponse } );
+
+    //Method to post document and hashed document to API as well as user ID
   }
 
   //This method takes in a new document to check if it already exists on the blockchain
@@ -65,27 +67,13 @@ class App extends Component {
   checkNewDocument = async (event) => {
     event.preventDefault();
     const { contract, document } = this.state;
-    alert("In check new doc var =" + document)
     //Invoking check method in content tracking contract
     const response = await contract.methods.newDocument(document).call();
-    alert('What is the repsonse var: ' + response);
+    alert(response.toUpperCase());
     //Update state with the result.
-    this.setState( { messageHashed: response } );
+    this.setState( { messageChecked: response } );
 
   }
-
-  // runExample = async () => {
-  //   const { accounts, contract } = this.state;
-
-  //   // Stores a given value, 5 by default.
-  //   await contract.methods.set(45).send({ from: accounts[0] });
-
-  //   // Get the value from the contract to prove it worked.
-  //   const response = await contract.methods.get().call();
-
-  //   // Update state with the result.
-  //   this.setState({ storageValue: response });
-  // };
 
   render() {
     if (!this.state.web3) {
